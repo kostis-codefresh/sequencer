@@ -1,0 +1,47 @@
+version: '1'
+environment: 'demo'
+purpose: 'create' # Also available mutate, validate, refresh, test, destroy
+name: 'Demo'
+description: 'Simple Demonstration for sequencer'
+retry:
+  timeout: 5m
+  interval: 1m
+  count: 3
+sequence:
+- task:
+    name: 'deploy-db'
+    description: 'the first one'
+    cmds:
+      - ./scripts/deploy-db.sh
+    verify:  
+      - ./scripts/verify-db.sh   # actual check, not just exit code
+    after: 
+      - echo "finished"
+
+- task:
+    name: 'deploy-api'
+    deps: [deploy-db]
+    before:
+      - echo "ping db"
+    cmds:
+      - ./scripts/deploy-api.sh
+    verify:  
+      - curl -sf http://localhost:8080/health
+    cleanup:
+      - kubectl delete -f . 
+    fail: 
+      - 
+
+- task:
+    name: 'deploy worker'
+    deps: [deploy-db]
+    cmds:
+      - ./scripts/deploy-worker.sh
+    verify:  
+      - ./scripts/verify-worker.sh
+
+- task:
+    name: 'release'
+    deps: [deploy-api, deploy-worker]   
+    cmds:
+      - echo "all verified, releasing"
