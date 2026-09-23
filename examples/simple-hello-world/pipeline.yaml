@@ -1,0 +1,16 @@
+version: '1'
+environment: 'demo'
+purpose: 'create'
+name: 'simple-hello-world'
+description: 'Minimal two-step example: hello then goodbye'
+sequence:
+- task:
+    name: 'hello'
+    cmds:
+      - echo "Hello world"
+
+- task:
+    name: 'goodbye'
+    deps: [hello]
+    cmds:
+      - echo "Goodbye world"

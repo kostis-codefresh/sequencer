@@ -1,0 +1,44 @@
+version: '1'
+environment: 'demo'
+purpose: 'create'
+name: 'advanced-archive-pipeline'
+description: 'Clone argo-rollouts and build zip, tgz, and bzip2 archives in parallel'
+retry:
+  timeout: 5m
+  interval: 1m
+  count: 3
+sequence:
+- task:
+    name: 'clone-repo'
+    description: 'Clone the argo-rollouts repository'
+    cmds:
+      - git clone https://github.com/argoproj/argo-rollouts.git
+    verify:
+      - test -d argo-rollouts
+
+- task:
+    name: 'create-zip'
+    description: 'Create a zip archive of the cloned repo'
+    deps: [clone-repo]
+    cmds:
+      - zip -r argo-rollouts.zip argo-rollouts
+    verify:
+      - test -f argo-rollouts.zip
+
+- task:
+    name: 'create-tgz'
+    description: 'Create a tar.gz archive of the cloned repo'
+    deps: [clone-repo]
+    cmds:
+      - tar czf argo-rollouts.tar.gz argo-rollouts
+    verify:
+      - test -f argo-rollouts.tar.gz
+
+- task:
+    name: 'create-bzip2'
+    description: 'Create a tar.bz2 archive of the cloned repo'
+    deps: [clone-repo]
+    cmds:
+      - tar cjf argo-rollouts.tar.bz2 argo-rollouts
+    verify:
+      - test -f argo-rollouts.tar.bz2
