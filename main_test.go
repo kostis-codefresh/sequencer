@@ -12,5 +12,5 @@ func TestHelloWorldPipeline(t *testing.T) {
 	s, err := spec.Load("examples/simple-hello-world/pipeline.yaml")
 	require.NoError(t, err)
 	require.NoError(t, s.Validate())
-	require.NoError(t, engine.Run(s))
+	require.NoError(t, engine.Run(s, "examples/simple-hello-world"))
 }

@@ -48,3 +48,12 @@ sequence:
       - tar cjf argo-rollouts.tar.bz2 argo-rollouts
     verify:
       - test -f argo-rollouts.tar.bz2
+
+- task:
+    name: 'compare'
+    description: 'Compare all 3 archives'
+    deps: [create-zip, create-tgz, create-bzip2]
+    cmds:
+      - ./scripts/compare.sh
+    verify:
+      - test -f comparison.txt

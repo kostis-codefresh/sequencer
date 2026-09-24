@@ -16,7 +16,7 @@ func TestRun_Success(t *testing.T) {
 		{Task: spec.Task{Name: "join", Deps: []string{"left", "right"}, Cmds: []string{"true"}}},
 	}}
 
-	require.NoError(t, Run(s))
+	require.NoError(t, Run(s, ""))
 }
 
 func TestRun_TaskFailurePropagates(t *testing.T) {
@@ -24,7 +24,7 @@ func TestRun_TaskFailurePropagates(t *testing.T) {
 		{Task: spec.Task{Name: "boom", Cmds: []string{"false"}}},
 	}}
 
-	require.ErrorContains(t, Run(s), "boom")
+	require.ErrorContains(t, Run(s, ""), "boom")
 }
 
 func TestRun_MissingPrerequisiteFailsFast(t *testing.T) {
@@ -36,7 +36,7 @@ func TestRun_MissingPrerequisiteFailsFast(t *testing.T) {
 		},
 	}
 
-	require.ErrorContains(t, Run(s), "definitely-not-a-real-binary-xyz")
+	require.ErrorContains(t, Run(s, ""), "definitely-not-a-real-binary-xyz")
 	_, err := os.Stat(marker)
 	require.True(t, os.IsNotExist(err), "task ran despite missing prerequisite")
 }
@@ -49,7 +49,7 @@ func TestRun_PrerequisitePresentSucceeds(t *testing.T) {
 		},
 	}
 
-	require.NoError(t, Run(s))
+	require.NoError(t, Run(s, ""))
 }
 
 func TestRun_StopsAfterFailedBatch(t *testing.T) {
@@ -58,6 +58,6 @@ func TestRun_StopsAfterFailedBatch(t *testing.T) {
 		{Task: spec.Task{Name: "after", Deps: []string{"boom"}, Cmds: []string{"true"}}},
 	}}
 
-	err := Run(s)
+	err := Run(s, "")
 	require.Error(t, err)
 }

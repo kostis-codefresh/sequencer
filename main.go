@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/kostis-codefresh/sequencer/pkg/engine"
 	"github.com/kostis-codefresh/sequencer/pkg/spec"
@@ -26,7 +27,7 @@ func main() {
 		log.Fatalf("invalid pipeline %s: %v", path, err)
 	}
 
-	if err := engine.Run(s); err != nil {
+	if err := engine.Run(s, filepath.Dir(path)); err != nil {
 		log.Fatalf("pipeline %s failed: %v", path, err)
 	}
 }

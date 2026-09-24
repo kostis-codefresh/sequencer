@@ -16,7 +16,12 @@ import (
 // Tasks whose deps are already satisfied run concurrently. Execution stops
 // scheduling new tasks as soon as any task fails, and Run returns a
 // combined error describing every task that failed in that batch.
-func Run(s *spec.Spec) error {
+//
+// dir is the directory containing the pipeline file; every cmd runs with
+// dir as its working directory, so relative paths in cmds (scripts,
+// clones, archives) resolve against the pipeline file's location rather
+// than wherever the CLI happened to be invoked from.
+func Run(s *spec.Spec, dir string) error {
 	if err := checkPrerequisites(s); err != nil {
 		return err
 	}
@@ -36,7 +41,7 @@ func Run(s *spec.Spec) error {
 			return fmt.Errorf("no runnable tasks remain, but %d task(s) did not complete", len(tasks)-len(done))
 		}
 
-		if err := runBatch(ready); err != nil {
+		if err := runBatch(ready, dir); err != nil {
 			return err
 		}
 
@@ -73,7 +78,7 @@ func allSatisfied(deps []string, done map[string]bool) bool {
 
 // runBatch runs every task in tasks concurrently and waits for all of them
 // to finish, returning a combined error if any failed.
-func runBatch(tasks []spec.Task) error {
+func runBatch(tasks []spec.Task, dir string) error {
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 	var errs []error
@@ -82,7 +87,7 @@ func runBatch(tasks []spec.Task) error {
 		wg.Add(1)
 		go func(t spec.Task) {
 			defer wg.Done()
-			if err := runTask(t); err != nil {
+			if err := runTask(t, dir); err != nil {
 				mu.Lock()
 				errs = append(errs, err)
 				mu.Unlock()
@@ -95,9 +100,10 @@ func runBatch(tasks []spec.Task) error {
 }
 
 // runTask runs each of t.Cmds in order, stopping at the first failure.
-func runTask(t spec.Task) error {
+func runTask(t spec.Task, dir string) error {
 	for _, cmd := range t.Cmds {
 		c := exec.Command("sh", "-c", cmd)
+		c.Dir = dir
 		c.Stdout = os.Stdout
 		c.Stderr = os.Stderr
 		if err := c.Run(); err != nil {
