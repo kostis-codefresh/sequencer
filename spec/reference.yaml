@@ -3,6 +3,16 @@ environment: 'demo'
 purpose: 'create' # Also available mutate, validate, refresh, test, destroy
 name: 'Demo'
 description: 'Simple Demonstration for sequencer'
+prerequisites: 
+  programs:
+    - git
+    - zip
+  files:
+    - /tmp
+    - ~/.bashrc
+  cmds:
+    - ./scripts/precheck.sh
+    - ./scripts/kubecontext.sh
 retry:
   timeout: 5m
   interval: 1m

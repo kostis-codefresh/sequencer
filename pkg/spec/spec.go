@@ -16,6 +16,11 @@ type Retry struct {
 	Count    int    `yaml:"count"`
 }
 
+// Prerequisites lists what must already be present before the pipeline runs.
+type Prerequisites struct {
+	Programs []string `yaml:"programs"`
+}
+
 // Task is a single unit of work in the pipeline.
 type Task struct {
 	Name        string   `yaml:"name"`
@@ -37,13 +42,14 @@ type SequenceItem struct {
 
 // Spec is the top-level pipeline definition.
 type Spec struct {
-	Version     string         `yaml:"version"`
-	Environment string         `yaml:"environment"`
-	Purpose     string         `yaml:"purpose"`
-	Name        string         `yaml:"name"`
-	Description string         `yaml:"description"`
-	Retry       *Retry         `yaml:"retry"`
-	Sequence    []SequenceItem `yaml:"sequence"`
+	Version       string         `yaml:"version"`
+	Environment   string         `yaml:"environment"`
+	Purpose       string         `yaml:"purpose"`
+	Name          string         `yaml:"name"`
+	Description   string         `yaml:"description"`
+	Prerequisites *Prerequisites `yaml:"prerequisites"`
+	Retry         *Retry         `yaml:"retry"`
+	Sequence      []SequenceItem `yaml:"sequence"`
 }
 
 // Tasks returns the pipeline's tasks in declaration order.

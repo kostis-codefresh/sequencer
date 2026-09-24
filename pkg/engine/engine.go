@@ -17,6 +17,10 @@ import (
 // scheduling new tasks as soon as any task fails, and Run returns a
 // combined error describing every task that failed in that batch.
 func Run(s *spec.Spec) error {
+	if err := checkPrerequisites(s); err != nil {
+		return err
+	}
+
 	tasks := s.Tasks()
 
 	byName := make(map[string]spec.Task, len(tasks))

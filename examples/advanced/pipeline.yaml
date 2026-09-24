@@ -3,6 +3,12 @@ environment: 'demo'
 purpose: 'create'
 name: 'advanced-archive-pipeline'
 description: 'Clone argo-rollouts and build zip, tgz, and bzip2 archives in parallel'
+prerequisites: 
+  programs:
+    - git
+    - zip
+    - bzip2
+    - tar
 retry:
   timeout: 5m
   interval: 1m

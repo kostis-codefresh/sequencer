@@ -32,6 +32,26 @@ sequence:
 	require.Equal(t, "hello", s.Tasks()[0].Name)
 }
 
+func TestLoad_Prerequisites(t *testing.T) {
+	path := writeSpec(t, `
+name: 'demo'
+prerequisites:
+  programs:
+    - git
+    - zip
+sequence:
+- task:
+    name: 'hello'
+    cmds:
+      - echo "hi"
+`)
+
+	s, err := Load(path)
+	require.NoError(t, err)
+	require.NotNil(t, s.Prerequisites)
+	require.Equal(t, []string{"git", "zip"}, s.Prerequisites.Programs)
+}
+
 func TestLoad_MissingFile(t *testing.T) {
 	_, err := Load(filepath.Join(t.TempDir(), "missing.yaml"))
 	require.Error(t, err)
