@@ -22,4 +22,4 @@ go.work.sum
 .env
 
 ## binary
-sequencer
+/dist/

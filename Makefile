@@ -1,8 +1,15 @@
-BIN_NAME=sequencer
+DIST_DIR=dist
 
 .PHONY: build
-build:
-	CGO_ENABLED=0 go build -v -o ${BIN_NAME} .
+build: build-sequencer build-web
+
+.PHONY: build-sequencer
+build-sequencer:
+	CGO_ENABLED=0 go build -v -o ${DIST_DIR}/sequencer ./cmd/sequencer
+
+.PHONY: build-web
+build-web:
+	CGO_ENABLED=0 go build -v -o ${DIST_DIR}/sequencer-web ./cmd/sequencer-web
 
 .PHONY: lint
 lint:
@@ -28,5 +35,5 @@ coverage:
 
 .PHONY: clean
 clean:
-	rm -f $(BIN_NAME)
+	rm -rf $(DIST_DIR)
 	rm -rf coverage.out coverage.html
