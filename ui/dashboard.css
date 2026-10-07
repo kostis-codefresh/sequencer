@@ -164,6 +164,19 @@ body {
         display: flex;
     }
 
+    .gcp-navbar {
+        flex-wrap: nowrap;
+    }
+
+    .navbar-logo {
+        height: 22px;
+    }
+
+    /* Hide the GeneratedAt timestamp to free navbar space */
+    .gcp-brand + .text-muted {
+        display: none;
+    }
+
     .gcp-sidebar {
         transform: translateX(-256px);
     }
