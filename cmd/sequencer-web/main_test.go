@@ -18,7 +18,7 @@ func get(t *testing.T, h http.Handler, path string) *httptest.ResponseRecorder {
 
 func TestPagesRenderGenerationDate(t *testing.T) {
 	h := newHandler()
-	for _, path := range []string{"/", "/critical.html"} {
+	for _, path := range []string{"/", "/tasks.html"} {
 		rec := get(t, h, path)
 		require.Equal(t, http.StatusOK, rec.Code, path)
 		assert.Contains(t, rec.Body.String(), "UTC</span>", path)
@@ -28,7 +28,7 @@ func TestPagesRenderGenerationDate(t *testing.T) {
 
 func TestStaticAssets(t *testing.T) {
 	h := newHandler()
-	for _, path := range []string{"/dashboard.css", "/img/rollouts.png"} {
+	for _, path := range []string{"/dashboard.css", "/img/sequencer-logo.png"} {
 		assert.Equal(t, http.StatusOK, get(t, h, path).Code, path)
 	}
 }
