@@ -3,6 +3,7 @@ package main
 import (
 	"cmp"
 	"crypto/rand"
+	"crypto/subtle"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -51,6 +52,22 @@ func (s *keyStore) remove(name string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	delete(s.keys, name)
+}
+
+// valid reports whether token matches a stored key, comparing in constant time.
+func (s *keyStore) valid(token string) bool {
+	if token == "" {
+		return false
+	}
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	found := false
+	for _, k := range s.keys {
+		if subtle.ConstantTimeCompare([]byte(token), []byte(k.Value)) == 1 {
+			found = true
+		}
+	}
+	return found
 }
 
 // list returns all keys, oldest first.

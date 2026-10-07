@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 type pageData struct {
 	GeneratedAt string
 	Keys        []apiKey
+	Tasks       []task
 	KeyName     string // create-key form input, kept after a failed submit
 	Error       string
 }
@@ -21,6 +23,7 @@ func newHandler() http.Handler {
 	tmpl := template.Must(template.ParseFS(ui.Embedded, "*.html"))
 	static := http.FileServerFS(ui.Embedded)
 	keys := newKeyStore()
+	tasks := newTaskStore()
 
 	execute := func(w http.ResponseWriter, name string, data pageData) {
 		if err := tmpl.ExecuteTemplate(w, name, data); err != nil {
@@ -35,6 +38,7 @@ func newHandler() http.Handler {
 		execute(w, name, pageData{
 			GeneratedAt: time.Now().UTC().Format("02 Jan 2006 15:04 MST"),
 			Keys:        keys.list(),
+			Tasks:       tasks.list(),
 		})
 	}
 
@@ -63,6 +67,20 @@ func newHandler() http.Handler {
 		keys.remove(r.FormValue("name"))
 		execute(w, "api-keys-section", pageData{Keys: keys.list()})
 	})
+
+	// htmx endpoints for the tasks page: polling refresh and delete.
+	mux.HandleFunc("GET /tasks/table", func(w http.ResponseWriter, _ *http.Request) {
+		execute(w, "tasks-section", pageData{Tasks: tasks.list()})
+	})
+	mux.HandleFunc("DELETE /tasks", func(w http.ResponseWriter, r *http.Request) {
+		if id, err := strconv.Atoi(r.FormValue("id")); err == nil {
+			tasks.remove(id)
+		}
+		execute(w, "tasks-section", pageData{Tasks: tasks.list()})
+	})
+
+	// Every /api/ route requires an API key.
+	mux.Handle("/api/", requireAPIKey(keys, newAPIHandler(tasks)))
 	return mux
 }
 
