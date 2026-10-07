@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -26,6 +27,23 @@ func TestPagesRenderGenerationDate(t *testing.T) {
 		assert.Contains(t, rec.Body.String(), "UTC</span>", path)
 		assert.NotContains(t, rec.Body.String(), "{{", path)
 	}
+}
+
+func TestOverviewSystemInfo(t *testing.T) {
+	rec := get(t, newHandler(), "/")
+	require.Equal(t, http.StatusOK, rec.Code)
+	body := rec.Body.String()
+	assert.Contains(t, body, "System info")
+	assert.Contains(t, body, "<strong>Goroutines:</strong>")
+	assert.Contains(t, body, runtime.Version())
+	assert.NotContains(t, body, "Project Details")
+}
+
+func TestFormatBytes(t *testing.T) {
+	assert.Equal(t, "512 B", formatBytes(512))
+	assert.Equal(t, "1.5 KiB", formatBytes(1536))
+	assert.Equal(t, "2.0 MiB", formatBytes(2<<20))
+	assert.Equal(t, "3.0 GiB", formatBytes(3<<30))
 }
 
 func TestStaticAssets(t *testing.T) {

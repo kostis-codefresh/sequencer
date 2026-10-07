@@ -47,9 +47,10 @@
         <div class="row g-3">
             <div class="col-md-6">
                 <div class="card gcp-card p-4">
-                    <h6 class="text-muted text-uppercase small fw-bold">Project Details</h6>
-                    <p class="mb-1"><strong>Project name:</strong> My Awesome App</p>
-                    <p class="mb-0"><strong>Project ID:</strong> unique-gcp-id-1234</p>
+                    <h6 class="text-muted text-uppercase small fw-bold">System info</h6>
+                    {{range .SysInfo}}
+                    <p class="mb-1"><strong>{{.Label}}:</strong> {{.Value}}</p>
+                    {{end}}
                 </div>
             </div>
             <div class="col-md-6">
