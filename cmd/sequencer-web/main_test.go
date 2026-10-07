@@ -3,6 +3,8 @@ package main
 import (
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -34,5 +36,56 @@ func TestStaticAssets(t *testing.T) {
 }
 
 func TestUnknownPage(t *testing.T) {
-	assert.Equal(t, http.StatusNotFound, get(t, newHandler(), "/nope.html").Code)
+	h := newHandler()
+	assert.Equal(t, http.StatusNotFound, get(t, h, "/nope.html").Code)
+	assert.Equal(t, http.StatusNotFound, get(t, h, "/api-keys-section").Code)
+}
+
+func createKey(t *testing.T, h http.Handler, name string) string {
+	t.Helper()
+	req := httptest.NewRequest(http.MethodPost, "/api-keys", strings.NewReader(url.Values{"name": {name}}.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	require.Equal(t, http.StatusOK, rec.Code)
+	return rec.Body.String()
+}
+
+func TestCreateAPIKey(t *testing.T) {
+	h := newHandler()
+	body := createKey(t, h, "ci-bot")
+	assert.Contains(t, body, "<td>ci-bot</td>")
+	assert.Contains(t, body, "<code>sk_")
+	assert.NotContains(t, body, "alert-danger")
+
+	page := get(t, h, "/api-keys.html").Body.String()
+	assert.Contains(t, page, "<td>ci-bot</td>")
+	assert.Contains(t, page, "htmx.min.js")
+}
+
+func TestCreateAPIKeyValidation(t *testing.T) {
+	h := newHandler()
+	createKey(t, h, "ci-bot")
+
+	body := createKey(t, h, "ci-bot")
+	assert.Contains(t, body, "already exists")
+	assert.Equal(t, 1, strings.Count(body, "<td>ci-bot</td>"))
+
+	body = createKey(t, h, "   ")
+	assert.Contains(t, body, "name of key is required")
+}
+
+func TestDeleteAPIKey(t *testing.T) {
+	h := newHandler()
+	createKey(t, h, "ci bot")
+	createKey(t, h, "deployer")
+
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodDelete, "/api-keys?name=ci+bot", nil))
+	require.Equal(t, http.StatusOK, rec.Code)
+	assert.NotContains(t, rec.Body.String(), "<td>ci bot</td>")
+	assert.Contains(t, rec.Body.String(), "<td>deployer</td>")
+
+	body := createKey(t, h, "a&b")
+	assert.Contains(t, body, `hx-delete="/api-keys?name=a%26b"`)
 }
