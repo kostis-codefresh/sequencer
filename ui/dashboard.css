@@ -94,6 +94,17 @@ body {
     color: #3c4043 !important;
 }
 
+.sidebar-section {
+    border-top: 1px solid #dadce0;
+    margin-top: 8px;
+    padding: 16px 8px 4px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #9aa0a6;
+}
+
 /* ── Table ── */
 
 .gcp-table-header {

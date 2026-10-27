@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -56,6 +58,12 @@ func newHandler() http.Handler {
 	mux.HandleFunc("GET /{page}", func(w http.ResponseWriter, r *http.Request) {
 		render(w, r, r.PathValue("page"))
 	})
+	mux.HandleFunc("GET /debug", func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		for _, row := range sysInfo() {
+			_, _ = fmt.Fprintf(w, "%s: %s\n", row.Label, row.Value)
+		}
+	})
 
 	// htmx endpoints: both reply with the re-rendered API keys section.
 	// Validation errors use 200 because htmx does not swap 4xx responses by default.
@@ -90,8 +98,12 @@ func newHandler() http.Handler {
 }
 
 func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 	srv := &http.Server{
-		Addr:              ":8080",
+		Addr:              ":" + port,
 		Handler:           newHandler(),
 		ReadHeaderTimeout: 5 * time.Second,
 	}

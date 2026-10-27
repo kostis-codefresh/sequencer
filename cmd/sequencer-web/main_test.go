@@ -39,6 +39,16 @@ func TestOverviewSystemInfo(t *testing.T) {
 	assert.NotContains(t, body, "Project Details")
 }
 
+func TestDebug(t *testing.T) {
+	rec := get(t, newHandler(), "/debug")
+
+	require.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "text/plain; charset=utf-8", rec.Header().Get("Content-Type"))
+	body := rec.Body.String()
+	assert.Contains(t, body, "Go version: "+runtime.Version()+"\n")
+	assert.Contains(t, body, "\nGoroutines: ")
+}
+
 func TestFormatBytes(t *testing.T) {
 	assert.Equal(t, "512 B", formatBytes(512))
 	assert.Equal(t, "1.5 KiB", formatBytes(1536))
