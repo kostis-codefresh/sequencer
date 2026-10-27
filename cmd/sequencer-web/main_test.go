@@ -29,13 +29,12 @@ func TestPagesRenderGenerationDate(t *testing.T) {
 	}
 }
 
-func TestOverviewSystemInfo(t *testing.T) {
+func TestOverviewVersion(t *testing.T) {
 	rec := get(t, newHandler(), "/")
 	require.Equal(t, http.StatusOK, rec.Code)
 	body := rec.Body.String()
-	assert.Contains(t, body, "System info")
-	assert.Contains(t, body, "<strong>Goroutines:</strong>")
-	assert.Contains(t, body, runtime.Version())
+	assert.Contains(t, body, "<strong>Version:</strong> dev</p>")
+	assert.NotContains(t, body, "Goroutines")
 	assert.NotContains(t, body, "Project Details")
 }
 

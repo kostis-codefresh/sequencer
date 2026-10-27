@@ -13,11 +13,14 @@ import (
 	"github.com/kostis-codefresh/sequencer/ui"
 )
 
+// version is overridden at build time with -ldflags "-X main.version=...".
+var version = "dev"
+
 type pageData struct {
 	GeneratedAt string
+	Version     string
 	Keys        []apiKey
 	Tasks       []task
-	SysInfo     []sysInfoRow
 	KeyName     string // create-key form input, kept after a failed submit
 	Error       string
 }
@@ -40,11 +43,9 @@ func newHandler() http.Handler {
 		}
 		data := pageData{
 			GeneratedAt: time.Now().UTC().Format("02 Jan 2006 15:04 MST"),
+			Version:     version,
 			Keys:        keys.list(),
 			Tasks:       tasks.list(),
-		}
-		if name == "index.html" {
-			data.SysInfo = sysInfo()
 		}
 		execute(w, name, data)
 	}

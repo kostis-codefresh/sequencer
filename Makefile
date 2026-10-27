@@ -1,5 +1,8 @@
 DIST_DIR=dist
 
+# Get version from git tag or hash, default to "dev"
+VERSION := $(shell git describe --tags --exact-match HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null || echo "dev")
+
 .PHONY: build
 build: build-sequencer build-web
 
@@ -9,7 +12,7 @@ build-sequencer:
 
 .PHONY: build-web
 build-web:
-	CGO_ENABLED=0 go build -v -o ${DIST_DIR}/sequencer-web ./cmd/sequencer-web
+	CGO_ENABLED=0 go build -v -ldflags "-X main.version=$(VERSION)" -o ${DIST_DIR}/sequencer-web ./cmd/sequencer-web
 
 .PHONY: lint
 lint:

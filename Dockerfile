@@ -7,7 +7,9 @@ RUN go mod download
 
 COPY ui ui
 COPY cmd/sequencer-web cmd/sequencer-web
-RUN CGO_ENABLED=0 GOOS=linux go build -o /out/sequencer-web ./cmd/sequencer-web
+# .git is not in the build context, so the version comes in as a build arg.
+ARG VERSION=dev
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-X main.version=${VERSION}" -o /out/sequencer-web ./cmd/sequencer-web
 
 FROM gcr.io/distroless/static-debian12:nonroot
 
