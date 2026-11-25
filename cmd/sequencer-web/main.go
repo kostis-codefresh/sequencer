@@ -17,12 +17,11 @@ import (
 var version = "dev"
 
 type pageData struct {
-	GeneratedAt string
-	Version     string
-	Keys        []apiKey
-	Tasks       []task
-	KeyName     string // create-key form input, kept after a failed submit
-	Error       string
+	Version string
+	Keys    []apiKey
+	Tasks   []task
+	KeyName string // create-key form input, kept after a failed submit
+	Error   string
 }
 
 func newHandler() http.Handler {
@@ -42,10 +41,9 @@ func newHandler() http.Handler {
 			return
 		}
 		data := pageData{
-			GeneratedAt: time.Now().UTC().Format("02 Jan 2006 15:04 MST"),
-			Version:     version,
-			Keys:        keys.list(),
-			Tasks:       tasks.list(),
+			Version: version,
+			Keys:    keys.list(),
+			Tasks:   tasks.list(),
 		}
 		execute(w, name, data)
 	}

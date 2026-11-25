@@ -23,6 +23,53 @@ body {
     color: #1a73e8;
 }
 
+.project-picker {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    color: #3c4043;
+    background: #fff;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+}
+
+.project-picker:hover {
+    background: #f1f3f4;
+}
+
+.project-menu .dropdown-item {
+    font-size: 0.875rem;
+}
+
+.project-menu .dropdown-item.active {
+    color: #1a73e8;
+    background-color: #e8f0fe;
+}
+
+.github-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #fff;
+    background: #24292f;
+    border: 1px solid rgba(31, 35, 40, 0.15);
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+.github-button:hover {
+    color: #fff;
+    background: #32383f;
+}
+
+.github-button svg {
+    width: 1rem;
+    height: 1rem;
+    fill: currentColor;
+}
+
 /* ── Hamburger (hidden on desktop) ── */
 
 .sidebar-toggle-input {
@@ -183,8 +230,8 @@ body {
         height: 22px;
     }
 
-    /* Hide the GeneratedAt timestamp to free navbar space */
-    .gcp-brand + .text-muted {
+    /* Make room for the project picker */
+    .gcp-brand {
         display: none;
     }
 

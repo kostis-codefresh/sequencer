@@ -19,12 +19,11 @@ func get(t *testing.T, h http.Handler, path string) *httptest.ResponseRecorder {
 	return rec
 }
 
-func TestPagesRenderGenerationDate(t *testing.T) {
+func TestPagesRender(t *testing.T) {
 	h := newHandler()
 	for _, path := range []string{"/", "/tasks.html", "/blueprints.html"} {
 		rec := get(t, h, path)
 		require.Equal(t, http.StatusOK, rec.Code, path)
-		assert.Contains(t, rec.Body.String(), "UTC</span>", path)
 		assert.NotContains(t, rec.Body.String(), "{{", path)
 	}
 }
