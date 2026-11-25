@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"regexp"
 	"runtime"
 	"strings"
 	"testing"
@@ -108,6 +109,21 @@ func TestCreateAPIKey(t *testing.T) {
 	page := get(t, h, "/api-keys.html").Body.String()
 	assert.Contains(t, page, "<td>ci-bot</td>")
 	assert.Contains(t, page, "htmx.min.js")
+}
+
+// TestKeysOnlyOnSettingsPage guards against a public template (or the shared
+// sidebar partial) printing keys: render passes them only to api-keys.html.
+func TestKeysOnlyOnSettingsPage(t *testing.T) {
+	h := loggedInHandler(t)
+	key := regexp.MustCompile(`sk_[0-9a-f]+`).FindString(createKey(t, h, "ci-bot"))
+	require.NotEmpty(t, key)
+
+	for _, path := range []string{"/", "/tasks.html", "/environments.html", "/agents.html", "/blueprints.html"} {
+		rec := get(t, h, path)
+		require.Equal(t, http.StatusOK, rec.Code, path)
+		assert.NotContains(t, rec.Body.String(), "sk_", path)
+	}
+	assert.Contains(t, get(t, h, "/api-keys.html").Body.String(), key)
 }
 
 func TestCreateAPIKeyValidation(t *testing.T) {

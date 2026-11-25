@@ -67,9 +67,12 @@ func newHandler(cfg authConfig) http.Handler {
 		data := pageData{
 			Version: version,
 			Page:    name,
-			Keys:    keys.list(),
 			Tasks:   tasks.list(),
 			User:    auth.current(r),
+		}
+		// Only the settings page shows keys; public pages never get them.
+		if name == "api-keys.html" {
+			data.Keys = keys.list()
 		}
 		execute(w, name, data)
 	}
