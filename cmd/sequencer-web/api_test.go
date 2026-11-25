@@ -49,7 +49,7 @@ func assertUnauthorized(t *testing.T, rec *httptest.ResponseRecorder) {
 }
 
 func TestAPIRequiresKey(t *testing.T) {
-	h := newHandler()
+	h := loggedInHandler(t)
 	key := newKey(t, h, "ci")
 
 	assertUnauthorized(t, apiCall(t, h, http.MethodGet, "/api/tasks", "", ""))
@@ -70,7 +70,7 @@ func TestAPIRequiresKey(t *testing.T) {
 }
 
 func TestAPIDeletedKeyIsRevoked(t *testing.T) {
-	h := newHandler()
+	h := loggedInHandler(t)
 	key := newKey(t, h, "ci")
 	require.Equal(t, http.StatusOK, apiCall(t, h, http.MethodGet, "/api/tasks", key, "").Code)
 
@@ -79,7 +79,7 @@ func TestAPIDeletedKeyIsRevoked(t *testing.T) {
 }
 
 func TestAPITasksLifecycle(t *testing.T) {
-	h := newHandler()
+	h := loggedInHandler(t)
 	key := newKey(t, h, "ci")
 
 	rec := apiCall(t, h, http.MethodPost, "/api/tasks", key, `{"name":"build","user":"kostis"}`)
@@ -106,7 +106,7 @@ func TestAPITasksLifecycle(t *testing.T) {
 }
 
 func TestAPICreateTaskValidation(t *testing.T) {
-	h := newHandler()
+	h := loggedInHandler(t)
 	key := newKey(t, h, "ci")
 
 	for name, body := range map[string]string{
@@ -129,7 +129,7 @@ func TestAPICreateTaskValidation(t *testing.T) {
 }
 
 func TestTasksPageIsReadOnly(t *testing.T) {
-	h := newHandler()
+	h := loggedInHandler(t)
 	key := newKey(t, h, "ci")
 	apiCall(t, h, http.MethodPost, "/api/tasks", key, `{"name":"build","user":"kostis"}`)
 

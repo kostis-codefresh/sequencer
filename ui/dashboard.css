@@ -254,3 +254,15 @@ body {
         display: block;
     }
 }
+
+.logout-form {
+    display: inline;
+}
+
+button.github-button {
+    cursor: pointer;
+}
+
+.nav-user {
+    font-size: 0.875rem;
+}

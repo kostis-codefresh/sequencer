@@ -20,7 +20,7 @@ func get(t *testing.T, h http.Handler, path string) *httptest.ResponseRecorder {
 }
 
 func TestPagesRender(t *testing.T) {
-	h := newHandler()
+	h := loggedInHandler(t)
 	for _, path := range []string{"/", "/tasks.html", "/blueprints.html"} {
 		rec := get(t, h, path)
 		require.Equal(t, http.StatusOK, rec.Code, path)
@@ -29,7 +29,7 @@ func TestPagesRender(t *testing.T) {
 }
 
 func TestOverviewVersion(t *testing.T) {
-	rec := get(t, newHandler(), "/")
+	rec := get(t, loggedInHandler(t), "/")
 	require.Equal(t, http.StatusOK, rec.Code)
 	body := rec.Body.String()
 	assert.Contains(t, body, "<strong>Version:</strong> dev</p>")
@@ -38,7 +38,7 @@ func TestOverviewVersion(t *testing.T) {
 }
 
 func TestDebug(t *testing.T) {
-	rec := get(t, newHandler(), "/debug")
+	rec := get(t, loggedInHandler(t), "/debug")
 
 	require.Equal(t, http.StatusOK, rec.Code)
 	assert.Equal(t, "text/plain; charset=utf-8", rec.Header().Get("Content-Type"))
@@ -55,14 +55,14 @@ func TestFormatBytes(t *testing.T) {
 }
 
 func TestStaticAssets(t *testing.T) {
-	h := newHandler()
+	h := loggedInHandler(t)
 	for _, path := range []string{"/dashboard.css", "/img/sequencer-logo.png"} {
 		assert.Equal(t, http.StatusOK, get(t, h, path).Code, path)
 	}
 }
 
 func TestUnknownPage(t *testing.T) {
-	h := newHandler()
+	h := loggedInHandler(t)
 	assert.Equal(t, http.StatusNotFound, get(t, h, "/nope.html").Code)
 	assert.Equal(t, http.StatusNotFound, get(t, h, "/api-keys-section").Code)
 }
@@ -78,7 +78,7 @@ func createKey(t *testing.T, h http.Handler, name string) string {
 }
 
 func TestCreateAPIKey(t *testing.T) {
-	h := newHandler()
+	h := loggedInHandler(t)
 	body := createKey(t, h, "ci-bot")
 	assert.Contains(t, body, "<td>ci-bot</td>")
 	assert.Contains(t, body, "<code>sk_")
@@ -90,7 +90,7 @@ func TestCreateAPIKey(t *testing.T) {
 }
 
 func TestCreateAPIKeyValidation(t *testing.T) {
-	h := newHandler()
+	h := loggedInHandler(t)
 	createKey(t, h, "ci-bot")
 
 	body := createKey(t, h, "ci-bot")
@@ -102,7 +102,7 @@ func TestCreateAPIKeyValidation(t *testing.T) {
 }
 
 func TestDeleteAPIKey(t *testing.T) {
-	h := newHandler()
+	h := loggedInHandler(t)
 	createKey(t, h, "ci bot")
 	createKey(t, h, "deployer")
 
@@ -117,8 +117,33 @@ func TestDeleteAPIKey(t *testing.T) {
 }
 
 func TestHealth(t *testing.T) {
-	rec := get(t, newHandler(), "/health")
-	require.Equal(t, http.StatusOK, rec.Code)
-	assert.Equal(t, "application/json", rec.Header().Get("Content-Type"))
-	assert.JSONEq(t, `{"status":"ok"}`, rec.Body.String())
+	testCases := []struct {
+		name string
+		cfg  authConfig
+		want string
+	}{
+		{
+			name: "configured",
+			cfg:  testAuthConfig,
+			want: `{"status":"ok","github_client_id_set":true,"github_client_secret_set":true,"missing":[],"app_base_url":"http://localhost:8080","github_auth":true}`,
+		},
+		{
+			name: "missing settings",
+			cfg:  authConfig{BaseURL: "https://sequencer.example.com"},
+			want: `{"status":"ok","github_client_id_set":false,"github_client_secret_set":false,"missing":["GITHUB_CLIENT_ID","GITHUB_CLIENT_SECRET"],"app_base_url":"https://sequencer.example.com","github_auth":true}`,
+		},
+		{
+			name: "auth disabled",
+			cfg:  authConfig{BaseURL: "http://localhost:8080", AuthDisabled: true},
+			want: `{"status":"ok","github_client_id_set":false,"github_client_secret_set":false,"missing":["GITHUB_CLIENT_ID","GITHUB_CLIENT_SECRET"],"app_base_url":"http://localhost:8080","github_auth":false}`,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			rec := get(t, newHandler(tc.cfg), "/health")
+			require.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, "application/json", rec.Header().Get("Content-Type"))
+			assert.JSONEq(t, tc.want, rec.Body.String())
+		})
+	}
 }
