@@ -1,0 +1,27 @@
+{{/* The left sidebar shared by every dashboard page. .Page is the current
+     template name; its link gets the active styling. */}}
+{{define "sidebar"}}
+{{- $active := "nav-link text-dark active fw-medium p-2 rounded nav-link-active"}}
+{{- $idle := "nav-link text-muted p-2" -}}
+    <div class="gcp-sidebar p-3">
+        <ul class="nav flex-column gap-1">
+            <li class="nav-item"><a class="{{if eq .Page "index.html"}}{{$active}}{{else}}{{$idle}}{{end}}" href="index.html">Overview</a></li>
+            <li class="nav-item"><a class="{{if eq .Page "pulse.html"}}{{$active}}{{else}}{{$idle}}{{end}}" href="pulse.html">Pulse</a></li>
+            <li class="nav-item sidebar-section">Plan</li>
+            <li class="nav-item"><a class="{{if eq .Page "changes.html"}}{{$active}}{{else}}{{$idle}}{{end}}" href="changes.html">Changes</a></li>
+            <li class="nav-item"><a class="{{if eq .Page "decisions.html"}}{{$active}}{{else}}{{$idle}}{{end}}" href="decisions.html">Decisions</a></li>
+            <li class="nav-item"><a class="{{if eq .Page "specs.html"}}{{$active}}{{else}}{{$idle}}{{end}}" href="specs.html">Specs</a></li>
+            <li class="nav-item"><a class="{{if eq .Page "epics.html"}}{{$active}}{{else}}{{$idle}}{{end}}" href="epics.html">Epics</a></li>
+            <li class="nav-item"><a class="{{if eq .Page "conversations.html"}}{{$active}}{{else}}{{$idle}}{{end}}" href="conversations.html">Conversations</a></li>
+            <li class="nav-item sidebar-section">Build</li>
+            <li class="nav-item"><a class="{{if eq .Page "tasks.html"}}{{$active}}{{else}}{{$idle}}{{end}}" href="tasks.html">Tasks</a></li>
+            <li class="nav-item"><a class="{{if eq .Page "environments.html"}}{{$active}}{{else}}{{$idle}}{{end}}" href="environments.html">Environments</a></li>
+            <li class="nav-item"><a class="{{if eq .Page "agents.html"}}{{$active}}{{else}}{{$idle}}{{end}}" href="agents.html">Agents</a></li>
+            <li class="nav-item sidebar-section">Warehouse</li>
+            <li class="nav-item"><a class="{{if eq .Page "blueprints.html"}}{{$active}}{{else}}{{$idle}}{{end}}" href="blueprints.html">Blueprints</a></li>
+            <li class="nav-item"><a class="{{if eq .Page "skills.html"}}{{$active}}{{else}}{{$idle}}{{end}}" href="skills.html">Skills</a></li>
+            <li class="nav-item sidebar-section">Settings</li>
+            <li class="nav-item"><a class="{{if eq .Page "api-keys.html"}}{{$active}}{{else}}{{$idle}}{{end}}" href="api-keys.html">API keys</a></li>
+        </ul>
+    </div>
+{{- end}}

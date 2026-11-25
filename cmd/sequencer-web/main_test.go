@@ -28,6 +28,27 @@ func TestPagesRender(t *testing.T) {
 	}
 }
 
+func TestSidebarActiveLink(t *testing.T) {
+	h := loggedInHandler(t)
+	pages := map[string]string{
+		"/":                  "index.html",
+		"/tasks.html":        "tasks.html",
+		"/environments.html": "environments.html",
+		"/agents.html":       "agents.html",
+		"/blueprints.html":   "blueprints.html",
+		"/api-keys.html":     "api-keys.html",
+	}
+	for path, page := range pages {
+		rec := get(t, h, path)
+		require.Equal(t, http.StatusOK, rec.Code, path)
+		body := rec.Body.String()
+		assert.Equal(t, 1, strings.Count(body, `nav-link-active" href="`+page+`"`), path)
+		assert.Equal(t, 1, strings.Count(body, "nav-link-active"), path)
+		assert.Contains(t, body, `href="skills.html"`, path)
+	}
+	assert.Equal(t, http.StatusNotFound, get(t, h, "/partials.tmpl").Code)
+}
+
 func TestOverviewVersion(t *testing.T) {
 	rec := get(t, loggedInHandler(t), "/")
 	require.Equal(t, http.StatusOK, rec.Code)

@@ -18,6 +18,8 @@ var version = "dev"
 
 type pageData struct {
 	Version string
+	// Page is the rendered template's name; the sidebar highlights its link.
+	Page    string
 	Keys    []apiKey
 	Tasks   []task
 	KeyName string // create-key form input, kept after a failed submit
@@ -42,7 +44,7 @@ type healthStatus struct {
 // GitHub login; without the OAuth settings in cfg nobody can log in, so they
 // are unreachable, unless cfg.AuthDisabled opens them to everyone.
 func newHandler(cfg authConfig) http.Handler {
-	tmpl := template.Must(template.ParseFS(ui.Embedded, "*.html"))
+	tmpl := template.Must(template.ParseFS(ui.Embedded, "*.html", "*.tmpl"))
 	static := http.FileServerFS(ui.Embedded)
 	keys := newKeyStore()
 	tasks := newTaskStore()
@@ -64,6 +66,7 @@ func newHandler(cfg authConfig) http.Handler {
 		}
 		data := pageData{
 			Version: version,
+			Page:    name,
 			Keys:    keys.list(),
 			Tasks:   tasks.list(),
 			User:    auth.current(r),
