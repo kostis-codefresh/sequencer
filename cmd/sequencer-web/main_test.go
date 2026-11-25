@@ -115,3 +115,10 @@ func TestDeleteAPIKey(t *testing.T) {
 	body := createKey(t, h, "a&b")
 	assert.Contains(t, body, `hx-delete="/api-keys?name=a%26b"`)
 }
+
+func TestHealth(t *testing.T) {
+	rec := get(t, newHandler(), "/health")
+	require.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "application/json", rec.Header().Get("Content-Type"))
+	assert.JSONEq(t, `{"status":"ok"}`, rec.Body.String())
+}

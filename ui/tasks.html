@@ -87,7 +87,6 @@
                             <th>Name</th>
                             <th>User</th>
                             <th>Created</th>
-                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -97,12 +96,9 @@
                             <td>{{.Name}}</td>
                             <td>{{.User}}</td>
                             <td>{{.CreatedAt.Format "02 Jan 2006 15:04 MST"}}</td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-link p-0" title="Delete task" hx-delete="/tasks?id={{.ID}}" hx-target="#tasks" hx-swap="outerHTML" hx-confirm="Delete task {{.Name}}?"><img src="img/trash.svg" alt="Delete"></button>
-                            </td>
                         </tr>
                         {{else}}
-                        <tr><td colspan="5" class="text-muted">No tasks yet. Create one with POST /api/tasks.</td></tr>
+                        <tr><td colspan="4" class="text-muted">No tasks yet. Create one with POST /api/tasks.</td></tr>
                         {{end}}
                     </tbody>
                 </table>

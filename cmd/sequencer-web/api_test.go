@@ -128,19 +128,18 @@ func TestAPICreateTaskValidation(t *testing.T) {
 	assert.Equal(t, http.StatusUnsupportedMediaType, rec.Code)
 }
 
-func TestTasksPageDelete(t *testing.T) {
+func TestTasksPageIsReadOnly(t *testing.T) {
 	h := newHandler()
 	key := newKey(t, h, "ci")
 	apiCall(t, h, http.MethodPost, "/api/tasks", key, `{"name":"build","user":"kostis"}`)
-	apiCall(t, h, http.MethodPost, "/api/tasks", key, `{"name":"test","user":"kostis"}`)
 
 	table := get(t, h, "/tasks/table").Body.String()
-	assert.Contains(t, table, `hx-delete="/tasks?id=1"`)
+	assert.Contains(t, table, "<td>build</td>")
+	assert.NotContains(t, table, "hx-delete")
 	assert.NotContains(t, table, "<html")
 
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, httptest.NewRequest(http.MethodDelete, "/tasks?id=1", nil))
-	require.Equal(t, http.StatusOK, rec.Code)
-	assert.NotContains(t, rec.Body.String(), "<td>build</td>")
-	assert.Contains(t, rec.Body.String(), "<td>test</td>")
+	assert.Equal(t, http.StatusMethodNotAllowed, rec.Code)
+	assert.Contains(t, get(t, h, "/tasks/table").Body.String(), "<td>build</td>")
 }

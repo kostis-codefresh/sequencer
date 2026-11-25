@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -57,6 +57,11 @@ func newHandler() http.Handler {
 	mux.HandleFunc("GET /{page}", func(w http.ResponseWriter, r *http.Request) {
 		render(w, r, r.PathValue("page"))
 	})
+	// Liveness only: it touches no store or external service.
+	mux.HandleFunc("GET /health", func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, `{"status":"ok"}`+"\n")
+	})
 	mux.HandleFunc("GET /debug", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		for _, row := range sysInfo() {
@@ -80,14 +85,8 @@ func newHandler() http.Handler {
 		execute(w, "api-keys-section", pageData{Keys: keys.list()})
 	})
 
-	// htmx endpoints for the tasks page: polling refresh and delete.
+	// htmx endpoint for the tasks page's polling refresh.
 	mux.HandleFunc("GET /tasks/table", func(w http.ResponseWriter, _ *http.Request) {
-		execute(w, "tasks-section", pageData{Tasks: tasks.list()})
-	})
-	mux.HandleFunc("DELETE /tasks", func(w http.ResponseWriter, r *http.Request) {
-		if id, err := strconv.Atoi(r.FormValue("id")); err == nil {
-			tasks.remove(id)
-		}
 		execute(w, "tasks-section", pageData{Tasks: tasks.list()})
 	})
 
